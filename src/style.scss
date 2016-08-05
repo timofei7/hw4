@@ -4,3 +4,25 @@ body {
   background: darken(white, 10%);
   margin: 50px;
 }
+
+.navbar {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-around;
+}
+
+.welcome {
+  display: flex;
+  justify-content: space-around;
+  flex-direction: column;
+  align-items: center;
+  align-self: center;
+  text-decoration-style: wavy;
+}
+
+.newPage, .showPage {
+  display: flex;
+  justify-content: space-around;
+  flex-direction: column;
+  align-items: center;
+}
