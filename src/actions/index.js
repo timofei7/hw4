@@ -4,6 +4,9 @@ import { browserHistory } from 'react-router';
 export const ActionTypes = {
   FETCH_POSTS: 'FETCH_POSTS',
   FETCH_POST: 'FETCH_POST',
+  AUTH_USER: 'AUTH_USER',
+  DEAUTH_USER: 'DEAUTH_USER',
+  AUTH_ERROR: 'AUTH_ERROR',
   // CREATE_POST: 'CREATE_POST',
   // UPDATE_POST: 'UPDATE_POST',
   // DELETE_POST: 'DELETE_POST',
@@ -37,7 +40,8 @@ export function fetchPost(id) {
 
 export function createPost(postObject) {
   return (dispatch) => {
-    axios.post(`${ROOT_URL}/posts/${API_KEY}`, postObject).then(response => {
+    axios.post(`${ROOT_URL}/posts/`, { headers: { authorization: localStorage.getItem('token') } })
+    .then(response => {
       browserHistory.push('/');
     }).catch(error => {
       console.log(error);
@@ -47,7 +51,8 @@ export function createPost(postObject) {
 
 export function updatePost(id, postObject) {
   return (dispatch) => {
-    axios.put(`${ROOT_URL}/posts/${id}${API_KEY}`, postObject).then(response => {
+    axios.put(`${ROOT_URL}/posts/${id}`, { headers: { authorization: localStorage.getItem('token') } })
+    .then(response => {
       dispatch({ type: ActionTypes.FETCH_POST, payload: {
         post: response.data } });
     }).catch(error => {
@@ -58,10 +63,50 @@ export function updatePost(id, postObject) {
 
 export function deletePost(id) {
   return (dispatch) => {
-    axios.delete(`${ROOT_URL}/posts/${id}${API_KEY}`).then(response => {
+    axios.delete(`${ROOT_URL}/posts/${id}`, { headers: { authorization: localStorage.getItem('token') } })
+    .then(response => {
       browserHistory.push('/');
     }).catch(error => {
       console.log(error);
     });
+  };
+}
+
+export function authError(error) {
+  return {
+    type: ActionTypes.AUTH_ERROR,
+    message: error,
+  };
+}
+
+export function signinUser({ email, password }) {
+  return (dispatch) => {
+    axios.post(`${ROOT_URL}/signin`, { email, password }).then(response => {
+      dispatch({ type: ActionTypes.AUTH_USER });
+      localStorage.setItem('token', response.data.token);
+      browserHistory.push('/');
+    }).catch(error => {
+      dispatch(authError(`Sign In Failed: ${error.response.data}`));
+    });
+  };
+}
+
+export function signupUser({ email, password }) {
+  return (dispatch) => {
+    axios.post(`${ROOT_URL}/signup`, { email, password }).then(response => {
+      dispatch({ type: ActionTypes.AUTH_USER });
+      localStorage.setItem('token', response.data.token);
+      browserHistory.push('/');
+    }).catch(error => {
+      dispatch(authError(`Sign Up Failed: ${error.response.data}`));
+    });
+  };
+}
+
+export function signoutUser() {
+  return (dispatch) => {
+    localStorage.removeItem('token');
+    dispatch({ type: ActionTypes.DEAUTH_USER });
+    browserHistory.push('/');
   };
 }
